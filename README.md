@@ -1,9 +1,9 @@
 To launch the server insert in the command prompt the following lines:
-g++ -o server server.cpp
-./server
+_g++ -o server server.cpp_
+_./server_
 
-Note that you have to launch these commands from the folder where server.cpp file is located. Additionally, you must have a g++ compiler installed on your device.
+Note that you have to launch these commands from the folder where _server.cpp_ file is located. Additionally, you must have a _g++_ compiler installed on your device.
 
-For the client, repeat the same procedure replacing 'server' with 'client'.
+For the client, repeat the same procedure replacing _'server'_ with _'client'_.
 
-Files server.cpp and client.cpp must be compiled in different terminal windows so that there is connection between them.
+Files _server.cpp_ and _client.cpp_ must be compiled in different terminal windows so that there is connection between them.
