@@ -1,4 +1,4 @@
-Próba implementacji gry.
+Próba implementacji gry. Zmiany w server.cpp, client.cpp praktycznie bez zmian.
 
 Gdy klient bądź server poda współrzędne wybranej kratki, zostaje tam wpisane odpowiednio kółko lub krzyżyk, oraz jest wyświetlona tabelka.
 
