@@ -4,6 +4,30 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
+int grid[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}; // SIATKA GRY
+
+std::string dataRead(int data) // ZAMIANA int NA string
+{
+	switch(data)
+	{
+		case -1: {return "X";}
+		case 1: {return "O";}
+		default: {return " ";}
+	}
+}
+
+void printGrid() // WYŚWIETLENIE GRY
+{
+	std::string sGrid = "\n "+dataRead(grid[0][0])+"|"+dataRead(grid[1][0])+"|"+dataRead(grid[2][0])+" \n — — — \n "+dataRead(grid[0][1])+"|"+dataRead(grid[1][1])+"|"+dataRead(grid[2][1])+" \n — — — \n "+dataRead(grid[0][2])+"|"+dataRead(grid[1][2])+"|"+dataRead(grid[2][2])+" \n";
+	std::cout << sGrid;
+}
+
+void sendGrid(int client_socket) // PRZESŁANIE GRY
+{
+	std::string sGrid = "\n "+dataRead(grid[0][0])+"|"+dataRead(grid[1][0])+"|"+dataRead(grid[2][0])+" \n — — — \n "+dataRead(grid[0][1])+"|"+dataRead(grid[1][1])+"|"+dataRead(grid[2][1])+" \n — — — \n "+dataRead(grid[0][2])+"|"+dataRead(grid[1][2])+"|"+dataRead(grid[2][2])+" \n";
+	send(client_socket, sGrid.c_str(), sGrid.size() + 1, 0);
+}
+
 int main()
 {
     // UTWORZENIE GNIAZDA
@@ -49,26 +73,35 @@ int main()
         // ODBIERANIE OD KLIENTA
         memset(buffer, 0, 4096);
         int bytes_received = recv(client_socket, buffer, 4096, 0);
-        if (bytes_received == -1)
+        if (bytes_received == -1) // SPRAWDZENIE, CZY WIADOMOŚĆ OD KLIENTA ZOSTAŁA ODEBRANA
         {
             std::cerr << "Error: Błąd podczas odbierania!\n";
             break;
         }
-
-        if (bytes_received == 0)
+        else if (bytes_received == 0) // SPRAWDZENIE, CZY KLIENT NADAJE ODPOWIEDŹ
         {
             std::cout << "Klient został odłączony!\n";
         }
-        std::cout << "Client: " << std::string(buffer, bytes_received) << "\n";
-
-        // SPRAWDZENIE, CZY KLIENT SIĘ ROZŁĄCZA
-        if (std::string(buffer) == "exit_client")
+        else if (std::string(buffer) == "exit_client") // SPRAWDZENIE, CZY KLIENT SIĘ ROZŁĄCZA
         {
             std::cout << "Klient się rozłączył!\n";
             close(client_socket);
         }
-
-
+        else
+		{
+            std::cout << "Client: " << std::string(buffer, bytes_received) << "\n";
+			if(std::string(buffer) == "1"){grid[0][0] = -1; printGrid();}
+			else if(std::string(buffer) == "2"){grid[1][0] = -1; printGrid();}
+			else if(std::string(buffer) == "3"){grid[2][0] = -1; printGrid();}
+			else if(std::string(buffer) == "4"){grid[0][1] = -1; printGrid();}
+			else if(std::string(buffer) == "5"){grid[1][1] = -1; printGrid();}
+			else if(std::string(buffer) == "6"){grid[2][1] = -1; printGrid();}
+			else if(std::string(buffer) == "7"){grid[0][2] = -1; printGrid();}
+			else if(std::string(buffer) == "8"){grid[1][2] = -1; printGrid();}
+			else if(std::string(buffer) == "9"){grid[2][2] = -1; printGrid();}
+        }
+        
+        
         // NADAWANIE DO KLIENTA
         std::string user_input;
         std::cout << "> ";
@@ -82,7 +115,18 @@ int main()
             break;
         }
         
-        int send_result = send(client_socket, user_input.c_str(), user_input.size() + 1, 0);
+        int send_result;
+        if(user_input == "1"){grid[0][0] = 1; sendGrid(client_socket);}
+		else if(user_input == "2"){grid[1][0] = 1; sendGrid(client_socket);}
+		else if(user_input == "3"){grid[2][0] = 1; sendGrid(client_socket);}
+		else if(user_input == "4"){grid[0][1] = 1; sendGrid(client_socket);}
+		else if(user_input == "5"){grid[1][1] = 1; sendGrid(client_socket);}
+		else if(user_input == "6"){grid[2][1] = 1; sendGrid(client_socket);}
+		else if(user_input == "7"){grid[0][2] = 1; sendGrid(client_socket);}
+		else if(user_input == "8"){grid[1][2] = 1; sendGrid(client_socket);}
+		else if(user_input == "9"){grid[2][2] = 1; sendGrid(client_socket);}
+		else {send_result = send(client_socket, user_input.c_str(), user_input.size() + 1, 0);}
+        
         if (send_result == -1)
         {
             std::cerr << "Error: Błąd podczas nadawania!\n";
