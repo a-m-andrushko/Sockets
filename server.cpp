@@ -4,97 +4,148 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
+int grid[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}; //stan gry
+
+std::string dataRead(int data) //zmiana int na string
+{
+	switch(data)
+	{
+		case 1: {return "X";}
+		case -1: {return "O";}
+		default: {return " ";}
+	}
+}
+
+void printGrid() //wyświetlenie stanu gry
+{
+	std::string sGrid = "\n "+dataRead(grid[0][0])+"|"+dataRead(grid[1][0])+"|"+dataRead(grid[2][0])+" \n - - - \n "+dataRead(grid[0][1])+"|"+dataRead(grid[1][1])+"|"+dataRead(grid[2][1])+" \n - - - \n "+dataRead(grid[0][2])+"|"+dataRead(grid[1][2])+"|"+dataRead(grid[2][2])+" \n";
+	std::cout << sGrid;
+}
+
+void sendGrid(int client_socket) //przesłanie stanu gry
+{
+	std::string sGrid = "\n "+dataRead(grid[0][0])+"|"+dataRead(grid[1][0])+"|"+dataRead(grid[2][0])+" \n - - - \n "+dataRead(grid[0][1])+"|"+dataRead(grid[1][1])+"|"+dataRead(grid[2][1])+" \n - - - \n "+dataRead(grid[0][2])+"|"+dataRead(grid[1][2])+"|"+dataRead(grid[2][2])+" \n";
+	send(client_socket, sGrid.c_str(), sGrid.size() + 1, 0);
+}
+
 int main()
 {
-    // UTWORZENIE GNIAZDA
-    int server_socket = socket(AF_INET, SOCK_STREAM, 0);   // socket(x, SOCK_STREAM, x) -- SYGNALIZUJE TCP
-    if (server_socket == -1)
-    {
-        std::cerr << "Error: Nie udało się utworzyć gniazda!\n";
-        exit(0);
-    }
+	// UTWORZENIE GNIAZDA
+	int server_socket = socket(AF_INET, SOCK_STREAM, 0);   // socket(x, SOCK_STREAM, x) -- SYGNALIZUJE TCP
+	if (server_socket == -1)
+	{
+		std::cerr << "Error: Nie udało się utworzyć gniazda!\n";
+		exit(0);
+	}
 
-    // BINDING GNIAZDA DO PORTU IP
-    sockaddr_in server_address;
-    server_address.sin_family = AF_INET;
-    server_address.sin_port = htons(8880);   // DOWOLNY SWOBODNY PORT
-    server_address.sin_addr.s_addr = INADDR_ANY;
-    if (bind(server_socket, (sockaddr*)&server_address, sizeof(server_address)) == -1)
-    {
-        std::cerr << "Error: Nie udało się powiązać gniazda do portu IP!\n";
-        exit(0);
-    }
+	// BINDING GNIAZDA DO PORTU IP
+	sockaddr_in server_address;
+	server_address.sin_family = AF_INET;
+	server_address.sin_port = htons(8880);   // DOWOLNY SWOBODNY PORT
+	server_address.sin_addr.s_addr = INADDR_ANY;
+	if (bind(server_socket, (sockaddr*)&server_address, sizeof(server_address)) == -1)
+	{
+		std::cerr << "Error: Nie udało się powiązać gniazda do portu IP!\n";
+		exit(0);
+	}
 
-    // NASŁUCHIWANIE
-    if (listen(server_socket, SOMAXCONN) == -1)
-    {
-        std::cerr << "Error: Nasłuchiwanie nie powiodło się!\n";
-        exit(0);
-    }
+	// NASŁUCHIWANIE
+	if (listen(server_socket, SOMAXCONN) == -1)
+	{
+		std::cerr << "Error: Nasłuchiwanie nie powiodło się!\n";
+		exit(0);
+	}
 
-    // POŁĄCZENIE
-    sockaddr_in client_address;
-    socklen_t client_size = sizeof(client_address);
-    int client_socket = accept(server_socket, (sockaddr*)&client_address, &client_size);
-    if (client_socket == -1)
-    {
-        std::cerr << "Error: Połączenie nie zostało nawiązane!\n";
-        exit(0);
-    }
+	// POŁĄCZENIE
+	sockaddr_in client_address;
+	socklen_t client_size = sizeof(client_address);
+	int client_socket = accept(server_socket, (sockaddr*)&client_address, &client_size);
+	if (client_socket == -1)
+	{
+		std::cerr << "Error: Połączenie nie zostało nawiązane!\n";
+		exit(0);
+	}
 
-    // KOMUNIKACJA
-    char buffer[4096];
-    while (true)
-    {
-        // ODBIERANIE OD KLIENTA
-        memset(buffer, 0, 4096);
-        int bytes_received = recv(client_socket, buffer, 4096, 0);
-        if (bytes_received == -1)
-        {
-            std::cerr << "Error: Błąd podczas odbierania!\n";
-            break;
-        }
-
-        if (bytes_received == 0)
-        {
-            std::cout << "Klient został odłączony!\n";
-        }
-        std::cout << "Client: " << std::string(buffer, bytes_received) << "\n";
-
-        // SPRAWDZENIE, CZY KLIENT SIĘ ROZŁĄCZA
-        if (std::string(buffer) == "exit_client")
-        {
-            std::cout << "Klient się rozłączył!\n";
-            close(client_socket);
-        }
+	// ZAMKNIĘCIE GNIAZDA SERWERA
+	if (server_socket != -1)
+	{
+		close(server_socket);
+	}
 
 
-        // NADAWANIE DO KLIENTA
-        std::string user_input;
-        std::cout << "> ";
-        std::getline(std::cin, user_input);
-        if (user_input == "exit_server")
-        {
-            std::cout << "Serwer kończy połączenie!" << "\n";
-            send(server_socket, user_input.c_str(), user_input.size() + 1, 0);
-            close(client_socket);
-            close(server_socket);
-            break;
-        }
-        
-        int send_result = send(client_socket, user_input.c_str(), user_input.size() + 1, 0);
-        if (send_result == -1)
-        {
-            std::cerr << "Error: Błąd podczas nadawania!\n";
-            break;
-        }
-    }
+	// KOMUNIKACJA
+	char buffer[4096];
+	while (true)
+	{
+		// ODBIERANIE OD KLIENTA
+		memset(buffer, '\0', 4096);
+		int bytes_received = recv(client_socket, buffer, 4096, 0);
+		if (bytes_received == -1)
+		{
+			std::cerr << "Error: Błąd podczas odbierania!\n";
+			break;
+		}
+		else if (bytes_received == 0)
+		{
+			std::cout << "Klient został odłączony!\n";
+		}
+		else
+		{
+			std::string client_input = std::string(buffer, bytes_received);
+			std::cout << "Client: " << client_input << "\n";
+			if(client_input.compare("A1") == 1){grid[0][0] = -1; printGrid();}
+			else if(client_input.compare("B1") == 1){grid[1][0] = -1; printGrid();}
+			else if(client_input.compare("C1") == 1){grid[2][0] = -1; printGrid();}
+			else if(client_input.compare("A2") == 1){grid[0][1] = -1; printGrid();}
+			else if(client_input.compare("B2") == 1){grid[1][1] = -1; printGrid();}
+			else if(client_input.compare("C2") == 1){grid[2][1] = -1; printGrid();}
+			else if(client_input.compare("A3") == 1){grid[0][2] = -1; printGrid();}
+			else if(client_input.compare("B3") == 1){grid[1][2] = -1; printGrid();}
+			else if(client_input.compare("C3") == 1){grid[2][2] = -1; printGrid();}
+	
+			// SPRAWDZENIE, CZY KLIENT SIĘ ROZŁĄCZA
+			if (client_input == "exit_client")
+			{
+				close(client_socket);
+			}
+		}
 
-    // ZAMKNIĘCIE GNIAZDA KLIENTA
-    if (client_socket != -1)
-    {
-        close(client_socket);
-    }
+		// NADAWANIE DO KLIENTA
+		std::string user_input;
+		std::cout << "> ";
+		std::getline(std::cin, user_input);
+		if (user_input == "exit_server")
+		{
+			send(client_socket, user_input.c_str(), user_input.size() + 1, 0);
+			close(server_socket);
+			close(client_socket);
+			break;
+		}
+		
+		int send_result;
+		if(user_input == "A1"){grid[0][0] = 1; sendGrid(client_socket);} //nie udało się w switch
+		else if(user_input == "B1"){grid[1][0] = 1; sendGrid(client_socket);}
+		else if(user_input == "C1"){grid[2][0] = 1; sendGrid(client_socket);}
+		else if(user_input == "A2"){grid[0][1] = 1; sendGrid(client_socket);}
+		else if(user_input == "B2"){grid[1][1] = 1; sendGrid(client_socket);}
+		else if(user_input == "C2"){grid[2][1] = 1; sendGrid(client_socket);}
+		else if(user_input == "A3"){grid[0][2] = 1; sendGrid(client_socket);}
+		else if(user_input == "B3"){grid[1][2] = 1; sendGrid(client_socket);}
+		else if(user_input == "C3"){grid[2][2] = 1; sendGrid(client_socket);}
+		else {send_result = send(client_socket, user_input.c_str(), user_input.size() + 1, 0);}
+		
+		if (send_result == -1)
+		{
+			std::cerr << "Error: Błąd podczas nadawania!\n";
+			break;
+		}
+	}
 
-    return 0;
+	// ZAMKNIĘCIE GNIAZDA KLIENTA
+	if (client_socket != -1)
+	{
+		close(client_socket);
+	}	
+
+	return 0;
 }
