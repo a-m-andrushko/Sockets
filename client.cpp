@@ -67,9 +67,7 @@ int main()
 	// ZAMKNIĘCIE GNIAZDA KLIENTA
 	if (client_socket != -1)
 	{
-		std::cout << "Serwer się rozłączył!\n";
 		close(client_socket);
-		break;
 	}
 
 	return 0;
