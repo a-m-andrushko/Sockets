@@ -1,0 +1,11 @@
+Próba implementacji gry.
+
+Gdy klient bądź server poda współrzędne wybranej kratki, zostaje tam wpisane odpowiednio kółko lub krzyżyk, oraz jest wyświetlona tabelka.
+
+Współrzędne to:
+A1 B1 C1
+A2 B2 C2
+A3 B3 C3
+
+Server zdaje się działać, ale klient ma problem z odczytaniem współrzędnych.
+Próbowałem to naprawić, ale nie znalazłem błędu, a kod i tak nie działa.
