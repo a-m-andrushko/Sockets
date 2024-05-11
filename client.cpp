@@ -47,6 +47,7 @@ int main()
             std::cerr << "Error: Błąd podczas nadawania!\n";
             break;
         }
+        
 
         // ODBIERANIE OD SERWERA
         memset(buffer, 0, 4096);
@@ -58,16 +59,13 @@ int main()
         }
         std::cout << "Server: " << std::string(buffer, bytes_received) << "\n";
 
-        if (std::string(buffer, bytes_received) == "exit_server")
+        // SPRAWDZENIE, CZY SERWER SIĘ ROZŁĄCZA
+        if (std::string(buffer) == "exit_server")
         {
+            std::cout << "Serwer się rozłączył!\n";
             close(client_socket);
+            break;
         }
-    }
-
-    // ZAMKNIĘCIE GNIAZDA KLIENTA
-    if (client_socket != -1)
-    {
-        close(client_socket);
     }
 
     return 0;

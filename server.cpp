@@ -42,13 +42,6 @@ int main()
         exit(0);
     }
 
-    // ZAMKNIĘCIE GNIAZDA SERWERA
-    if (server_socket != -1)
-    {
-        close(server_socket);
-    }
-
-
     // KOMUNIKACJA
     char buffer[4096];
     while (true)
@@ -69,8 +62,9 @@ int main()
         std::cout << "Client: " << std::string(buffer, bytes_received) << "\n";
 
         // SPRAWDZENIE, CZY KLIENT SIĘ ROZŁĄCZA
-        if (std::string(buffer, bytes_received) == "exit_client")
+        if (std::string(buffer) == "exit_client")
         {
+            std::cout << "Klient się rozłączył!\n";
             close(client_socket);
         }
 
@@ -81,9 +75,10 @@ int main()
         std::getline(std::cin, user_input);
         if (user_input == "exit_server")
         {
-            send(client_socket, user_input.c_str(), user_input.size() + 1, 0);
-            close(server_socket);
+            std::cout << "Serwer kończy połączenie!" << "\n";
+            send(server_socket, user_input.c_str(), user_input.size() + 1, 0);
             close(client_socket);
+            close(server_socket);
             break;
         }
         
@@ -99,7 +94,7 @@ int main()
     if (client_socket != -1)
     {
         close(client_socket);
-    }    
+    }
 
     return 0;
 }
