@@ -6,30 +6,37 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h> /* close */
+#include <string.h>
 
 int turn = 0;
 
 int main(int arc, char *argv[])
 {
-	// UTWORZENIE GNIAZDA
-	int client_socket = socket(AF_INET, SOCK_STREAM, 0);
-	if (client_socket == -1)
+	int client_socket, server_socket;
+	sockaddr_in server_address, client_address;
+	struct hostent *h;
+	
+	h = gethostbyname(argv[1]);
+	server_address.sin_family = h->h_addrtype;
+	memcpy((char *) &server_address.sin_addr.s_addr, h->h_addr_list[0], h->h_length);
+	server_address.sin_port = htons(8080);
+	
+	client_socket = socket(AF_INET, SOCK_STREAM, 0);
+	if (client_socket < 0)
 	{
 		std::cerr << "Error: Nie udało się utworzyć gniazda!\n";
 		exit(0);
 	}
-
-	// BINDING GNIAZDA DO PORTU IP SERWERA
-	sockaddr_in server_address;
-	//server_address.sin_family = AF_INET;
 	
-	struct hostent *h;
-	h = gethostbyname(argv[1]);
-	server_address.sin_family = h->h_addrtype;
+	client_address.sin_family = AF_INET;
+	client_address.sin_addr.s_addr = htonl(INADDR_ANY);
+	client_address.sin_port = htons(0);
 	
-	server_address.sin_port = htons(8080);   // JAK W SERWERZE
-	server_address.sin_addr.s_addr = INADDR_ANY;
-	if (connect(client_socket, (sockaddr*)&server_address, sizeof(server_address)) == -1)
+	server_socket = connect(client_socket, (struct sockaddr *) &server_address, sizeof(server_address));
+	if (server_socket == -1)
 	{
 		std::cerr << "Error: Nie udało się nawiązać połączenia z serwerem!\n";
 		exit(0);
