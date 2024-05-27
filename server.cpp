@@ -3,6 +3,13 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 
 int grid[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}; // SIATKA GRY
 
@@ -28,7 +35,7 @@ void sendGrid(int client_socket) // PRZESŁANIE GRY
 	send(client_socket, sGrid.c_str(), sGrid.size() + 1, 0);
 }
 
-int main()
+int main (int argc, char *argv[])
 {
     // UTWORZENIE GNIAZDA
     int server_socket = socket(AF_INET, SOCK_STREAM, 0);   // socket(x, SOCK_STREAM, x) -- SYGNALIZUJE TCP
@@ -41,8 +48,8 @@ int main()
     // BINDING GNIAZDA DO PORTU IP
     sockaddr_in server_address;
     server_address.sin_family = AF_INET;
-    server_address.sin_port = htons(8880);   // DOWOLNY SWOBODNY PORT
-    server_address.sin_addr.s_addr = INADDR_ANY;
+    server_address.sin_addr.s_addr = htonl(INADDR_ANY);
+    server_address.sin_port = htons(8080);   // DOWOLNY SWOBODNY PORT    
     if (bind(server_socket, (sockaddr*)&server_address, sizeof(server_address)) == -1)
     {
         std::cerr << "Error: Nie udało się powiązać gniazda do portu IP!\n";
@@ -50,7 +57,7 @@ int main()
     }
 
     // NASŁUCHIWANIE
-    if (listen(server_socket, SOMAXCONN) == -1)
+    if (listen(server_socket, 5) == -1)
     {
         std::cerr << "Error: Nasłuchiwanie nie powiodło się!\n";
         exit(0);
@@ -85,7 +92,7 @@ int main()
         else if (std::string(buffer) == "exit_client") // SPRAWDZENIE, CZY KLIENT SIĘ ROZŁĄCZA
         {
             std::cout << "Klient się rozłączył!\n";
-            close(client_socket);
+            //close(client_socket);
         }
         else
 		{
