@@ -12,4 +12,4 @@ _./client server_ip_address_
 
 Note that both the server and the client must be connected to the same network.
 
-Files _server.cpp_ and _client.cpp_ must be compiled in different terminal windows so that there is connection between them.
+Files _server.cpp_ and _client.cpp_ must be compiled in different terminal windows (or on different machines in the same network) so that there is connection between them.
