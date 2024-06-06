@@ -22,7 +22,7 @@ int main(int arc, char *argv[])
 	h = gethostbyname(argv[1]);
 	server_address.sin_family = h -> h_addrtype;
 	memcpy((char *) &server_address.sin_addr.s_addr, h -> h_addr_list[0], h -> h_length);
-	server_address.sin_port = htons(8008); // TEN SAM PORT, CO U SERWERA
+	server_address.sin_port = htons(8080); // TEN SAM PORT, CO U SERWERA
 	
 	client_socket = socket(AF_INET, SOCK_STREAM, 0);
 	if (client_socket < 0)
@@ -51,11 +51,12 @@ int main(int arc, char *argv[])
 	std::cout << "4 | 5 | 6 " << "\n";
 	std::cout << "— — — — —" << "\n";
 	std::cout << "7 | 8 | 9 " << "\n" << "\n";
-	std::cout << "- send a number 1-9 to make a move in a preferred cell;" << "\n";
+	std::cout << "- send a number 1-9 to make a move in a preferred tile;" << "\n";
 	std::cout << "- you make moves in turns;" << "\n";
-	std::cout << "- you can make moves only in empty cells;" << "\n";
-	std::cout << "- completing 3 cells horizontally, vertically or diagonally determines the winner;" << "\n";
-	std::cout << "- in case of a victory or a draw, the game quits automatically, you need to relaunch to start over." << "\n" << "\n";
+	std::cout << "- you can make moves only in empty tiles;" << "\n";
+	std::cout << "- completing 3 tiles horizontally, vertically or diagonally determines the winner;" << "\n";
+	std::cout << "- in case of a victory or a tie, the game quits automatically, you need to relaunch to start over;" << "\n" << "\n";
+	std::cout << "- type 'exit' to exit the game." << "\n" << "\n";
 	
 	while (true)
 	{
@@ -67,7 +68,7 @@ int main(int arc, char *argv[])
 			std::getline(std::cin, user_input);
 			if (user_input == "exit")
 			{
-				std::cout << "Client!" << "\n";
+				std::cout << "Client disconnected!" << "\n";
 				send(client_socket, user_input.c_str(), user_input.size() + 1, 0);
 				close(client_socket);
 				break;
@@ -84,7 +85,7 @@ int main(int arc, char *argv[])
 			}
 			else
 			{
-				std::cout << "Invalid input! Please, enter a number from 1-9 range or exit to terminate game." << "\n";
+				std::cout << "Invalid input! Please, enter a number from 1-9 or exit to terminate the game." << "\n";
 			}
 		}
 		if(turn == 1)
@@ -99,7 +100,7 @@ int main(int arc, char *argv[])
 			}
 			std::cout << "Server: " << std::string(buffer, bytes_received) << "\n";
 	
-			if (std::string(buffer) == "You won! The game will now quit." || std::string(buffer) == "You lost! The game will now quit.")
+			if (std::string(buffer) == "You won! The game will now quit." || std::string(buffer) == "You lost! The game will now quit." || std::string(buffer) == "It's a tie! The game will now quit.")
 			{
 				close(client_socket);
 				break;
