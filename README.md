@@ -1,3 +1,5 @@
+# Establishing connection between the server and client ends
+
 To launch the server, insert in the command prompt the following lines:
 
 _g++ -o server server.cpp_
